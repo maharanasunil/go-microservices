@@ -8,54 +8,48 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/gorilla/mux"
+	"github.com/nicholasjackson/env"
 	"github.com/sunilmaharana/handlers"
 )
 
+// env is a module created by nicholas to handle env variables
+var bindAddress = env.String("BIND_ADDRESS", false, ":9090", "Bind Address for the server")
+
 func main() {
 
-	/*
-		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			log.Println("Hello World")
-			d, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				http.Error(w, "Ooops", http.StatusBadRequest)
-				// w.WriteHeader(http.StatusBadRequest)
-				// w.Write([]byte("Ooops"))
-				return
-			}
-			// log.Printf("Data %s\n", d)
-			fmt.Fprintf(w, "Hello %s", d)
-		})
-		http.HandleFunc("/goodbye", func(w http.ResponseWriter, r *http.Request) {
-			log.Println("GoodBye World")
-		})
-		http.ListenAndServe(":9090", sm)
-	*/
+	env.Parse()
 
 	// Prefixes every log with product-api
 	l := log.New(os.Stdout, "product-api", log.LstdFlags)
 
-	// Each handler gets the logger so they can log messages internally.
-	// hh := handlers.NewHello(l)
-	gh := handlers.NewGoodBye(l)
 	ph := handlers.NewProducts(l)
 
-	// '''ServeMux routes requests based on path'''
+	// We use gorilla mux package now
+	sm := mux.NewRouter()
 
-	sm := http.NewServeMux()
-	// Register each handler to my server via servemux
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	// Register handler to my server via HandleFunc
+	getRouter.HandleFunc("/", ph.GetProducts) // products handler (We capitalized the func name and it became public)
 
-	// sm.Handle("/", hh)
-	sm.Handle("/goodbye", gh)
-	sm.Handle("/", ph) // products handler
+	putRouter := sm.Methods(http.MethodPut).Subrouter()
+	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProducts)
+
+	// Use Middleware
+	putRouter.Use(ph.MiddlewareValidateProduct)
+
+	postRouter := sm.Methods(http.MethodPost).Subrouter()
+	postRouter.HandleFunc("/", ph.AddProduct)
+	postRouter.Use(ph.MiddlewareValidateProduct)
 
 	// It is just a type in server
-	s := &http.Server{
-		Addr:         ":9090",
+	s := http.Server{
+		Addr:         *bindAddress,
 		Handler:      sm,
+		ErrorLog:     l,
 		IdleTimeout:  120 * time.Second,
-		ReadTimeout:  1 * time.Second,
-		WriteTimeout: 1 * time.Second,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	// Start Server in a Goroutine
