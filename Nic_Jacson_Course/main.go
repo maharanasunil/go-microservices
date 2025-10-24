@@ -34,12 +34,12 @@ func main() {
 
 	putRouter := sm.Methods(http.MethodPut).Subrouter()
 	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProducts)
-
-	// Use Middleware
+	// Use Middleware to validate JSON
 	putRouter.Use(ph.MiddlewareValidateProduct)
 
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
 	postRouter.HandleFunc("/", ph.AddProduct)
+	// Use Middleware to validate JSON
 	postRouter.Use(ph.MiddlewareValidateProduct)
 
 	// It is just a type in server
@@ -55,6 +55,8 @@ func main() {
 	// Start Server in a Goroutine
 	// This piece of code starts your web server in the background, so that the main program can do something else (like listen for shutdown signals)
 	go func() {
+		l.Println("Starting server on port 9090")
+
 		err := s.ListenAndServe() // starts your HTTP server on the port you defined earlier
 		if err != nil {
 			l.Fatal(err) // Logs error and exits immediately.
