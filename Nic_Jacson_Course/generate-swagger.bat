@@ -10,4 +10,3 @@ if %errorlevel% neq 0 (
 echo Generating swagger.yaml ...
 swagger generate spec -o ./swagger.yaml --scan-models
 echo Swagger spec generated successfully!
-pause

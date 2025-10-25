@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/gorilla/mux"
 	"github.com/nicholasjackson/env"
 	"github.com/sunilmaharana/handlers"
@@ -41,6 +42,16 @@ func main() {
 	postRouter.HandleFunc("/", ph.AddProduct)
 	// Use Middleware to validate JSON
 	postRouter.Use(ph.MiddlewareValidateProduct)
+
+	deleteRouter := sm.Methods(http.MethodDelete).Subrouter()
+	deleteRouter.HandleFunc("/{id:[0-9]+}", ph.DeleteProduct)
+
+	opts := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
+	sh := middleware.Redoc(opts, nil)
+	// We use the Handle here which directly routes you to the url. HandleFunc takes a function
+	getRouter.Handle("/docs", sh)
+
+	getRouter.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
 	// It is just a type in server
 	s := http.Server{
