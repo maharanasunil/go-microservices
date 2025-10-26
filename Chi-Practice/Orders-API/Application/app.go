@@ -6,10 +6,12 @@ import (
 	"net/http"
 )
 
+// Defines an App type that stores the router
 type App struct {
 	router http.Handler
 }
 
+// initializes App and sets router by calling loadRoutes()
 func New() *App {
 	app := &App{
 		router: loadRoutes(),
