@@ -8,6 +8,11 @@ func main() {
 	var agePointer *int
 	agePointer = &age // pointer variable
 
+	/* NOTES:
+	- If we add &var_name => We get the address of the variable
+	- If we have address and we want to see what value we have => *address_of_variable
+	*/
+
 	fmt.Println("Pointer address of Age variable:", agePointer)
 
 	// de-referencing
