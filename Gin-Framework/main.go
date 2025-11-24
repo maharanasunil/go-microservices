@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sunil/gin-practice/controllers"
 )
 
 func main() {
@@ -11,17 +12,20 @@ func main() {
 	router := gin.Default()
 
 	// Define a simple GET endpoint. It takes the path and gin.Context
-	router.GET("/ping", getJSONdata)
-	router.GET("/me/:id/:newId", getId)
-	router.POST("/me", getEmailPswd)
+	// router.GET("/ping", getJSONdata)
+	// router.GET("/me/:id/:newId", getId)
+	// router.POST("/me", getEmailPswd)
 
-	// PUT is basically used to update entire data
-	router.PUT("/upload", getEmailPswd)
-	// PATCH is used to update a small part
-	router.PATCH("/me", getEmailPswd)
+	// // PUT is basically used to update entire data
+	// router.PUT("/upload", getEmailPswd)
+	// // PATCH is used to update a small part
+	// router.PATCH("/me", getEmailPswd)
 
-	// DELETE is basically used to delete a key/id
-	router.DELETE("/delete/:id", deleteId)
+	// // DELETE is basically used to delete a key/id
+	// router.DELETE("/delete/:id", deleteId)
+
+	notesController := &controllers.NotesController{}
+	notesController.InitNotesControllerRoutes(router)
 
 	router.Run(":8000")
 }
